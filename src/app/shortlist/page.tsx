@@ -1,30 +1,46 @@
 "use client";
 
 import { useState } from "react";
+import { fetchApi } from "@/lib/api";
 import { Send, Bot, FileText, Download, CheckCircle2 } from "lucide-react";
 
 export default function AIShortlister() {
     const [query, setQuery] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [results, setResults] = useState<any[] | null>(null);
+    const [explanation, setExplanation] = useState<string | null>(null);
 
-    const handleQuery = (e: React.FormEvent) => {
+    const handleQuery = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!query) return;
 
         setIsProcessing(true);
         setResults(null);
+        setExplanation(null);
 
-        // Simulate backend LLM parsing and slow SQL execution
-        setTimeout(() => {
-            setResults([
-                { id: "REG20220012", name: "Alice Smith", dept: "AI & DS", cgpa: 8.9, offers: 2 },
-                { id: "REG20220054", name: "David Chen", dept: "AI & DS", cgpa: 9.1, offers: 1 },
-                { id: "REG20220089", name: "Priya Sharma", dept: "Information Tech", cgpa: 8.5, offers: 0 },
-                { id: "REG20220102", name: "James Wilson", dept: "Computer Science", cgpa: 8.7, offers: 3 },
-            ]);
+        try {
+            const data = await fetchApi("/chatbot/shortlist", {
+                method: "POST",
+                body: JSON.stringify({ job_description: query })
+            });
+
+            // Map backend student models to frontend grid layout
+            const formattedResults = data.students.map((student: any) => ({
+                id: student.register_number,
+                name: student.name,
+                dept: student.department,
+                cgpa: student.cgpa,
+                offers: student.is_placed ? 1 : 0
+            }));
+
+            setResults(formattedResults);
+            setExplanation(data.explanation);
+        } catch (error) {
+            console.error("AI Query Error:", error);
+            // In a real app we'd show a toast error notification here
+        } finally {
             setIsProcessing(false);
-        }, 2000);
+        }
     };
 
     return (
@@ -82,7 +98,7 @@ export default function AIShortlister() {
                                         Query Execution Successful
                                     </div>
                                     <div className="text-slate-300">
-                                        Found {results.length} eligible candidates matching your criteria.
+                                        {explanation || `Found ${results.length} eligible candidates matching your criteria.`}
                                     </div>
                                 </div>
                             </div>
