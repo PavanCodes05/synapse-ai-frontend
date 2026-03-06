@@ -16,6 +16,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import { motion, Variants } from "framer-motion";
 
 export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
@@ -49,13 +50,33 @@ export default function AnalyticsDashboard() {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin"></div>
-        <div className="text-cyan-400 font-display animate-pulse tracking-widest">INITIALIZING DATA TERMINAL...</div>
+        <div className="text-cyan-400 font-display animate-pulse tracking-widest text-glow-cyan">INITIALIZING DATA TERMINAL...</div>
       </div>
     );
   }
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-6"
+    >
 
       {/* Bento Box Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -65,6 +86,7 @@ export default function AnalyticsDashboard() {
           value="1,024"
           icon={<Users className="w-6 h-6 text-cyan-400" />}
           trend="+12% from last year"
+          variants={itemVariants}
         />
         <MetricCard
           title="Placement Rate"
@@ -72,29 +94,32 @@ export default function AnalyticsDashboard() {
           icon={<TrendingUp className="w-6 h-6 text-purple-400" />}
           trend="+5.2% from last year"
           glow="purple"
+          variants={itemVariants}
         />
         <MetricCard
           title="Total Offers"
           value="842"
           icon={<Briefcase className="w-6 h-6 text-emerald-400" />}
           trend="1.2 offers per student"
+          variants={itemVariants}
         />
         <MetricCard
           title="Companies Visited"
           value="45"
           icon={<Building2 className="w-6 h-6 text-blue-400" />}
           trend="8 new companies"
+          variants={itemVariants}
         />
 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chart */}
-        <div className="lg:col-span-2 glass rounded-2xl p-6 relative overflow-hidden group">
+        <motion.div variants={itemVariants} className="lg:col-span-2 glass rounded-2xl p-6 relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-500 opacity-50 group-hover:opacity-100 transition-opacity" />
           <h2 className="font-display text-lg font-semibold mb-6 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            Placement Trajectory (2025-2026)
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+            <span className="text-glow-cyan">Placement Trajectory (2025-2026)</span>
           </h2>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -109,8 +134,8 @@ export default function AnalyticsDashboard() {
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                  itemStyle={{ color: '#22d3ee' }}
+                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
+                  itemStyle={{ color: '#22d3ee', fontWeight: 'bold' }}
                 />
                 <Area
                   type="monotone"
@@ -119,58 +144,67 @@ export default function AnalyticsDashboard() {
                   strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#colorValue)"
+                  animationDuration={1500}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </motion.div>
 
         {/* Top Companies List */}
-        <div className="glass rounded-2xl p-6">
+        <motion.div variants={itemVariants} className="glass rounded-2xl p-6">
           <h2 className="font-display text-lg font-semibold mb-6">Top Recruiters</h2>
           <div className="space-y-4">
             {topCompanies.map((company, i) => (
-              <div key={company.name} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/30 border border-slate-700/50 hover:bg-slate-800/50 transition-colors">
+              <motion.div
+                whileHover={{ x: 5, backgroundColor: 'rgba(30, 41, 59, 0.8)' }}
+                key={company.name}
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer transition-colors"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-slate-300">
+                  <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-slate-300 shadow-inner">
                     {i + 1}
                   </div>
                   <span className="font-medium text-slate-200">{company.name}</span>
                 </div>
-                <div className="text-cyan-400 font-semibold bg-cyan-500/10 px-3 py-1 rounded-full text-sm">
+                <div className="text-cyan-400 font-semibold bg-cyan-500/10 px-3 py-1 rounded-full text-sm border border-cyan-500/20">
                   {company.offers} offers
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-          <button className="w-full mt-6 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-600 transition-all text-sm font-medium">
+          <button className="w-full mt-6 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-500 transition-all text-sm font-medium">
             View All Companies
           </button>
-        </div>
+        </motion.div>
       </div>
 
-    </div>
+    </motion.div>
   );
 }
 
-function MetricCard({ title, value, icon, trend, glow = "cyan" }: { title: string, value: string, icon: React.ReactNode, trend: string, glow?: "cyan" | "purple" }) {
+function MetricCard({ title, value, icon, trend, glow = "cyan", variants }: { title: string, value: string, icon: React.ReactNode, trend: string, glow?: "cyan" | "purple", variants: any }) {
   return (
-    <div className={`glass rounded-2xl p-6 relative group overflow-hidden ${glow === "purple" ? "hover:neon-border-purple" : "hover:neon-border"} transition-all duration-300`}>
+    <motion.div
+      variants={variants}
+      whileHover={{ y: -5, scale: 1.02 }}
+      className={`glass rounded-2xl p-6 relative group overflow-hidden ${glow === "purple" ? "hover:neon-border-purple" : "hover:neon-border"} transition-all duration-300 cursor-pointer`}
+    >
       <div className="flex justify-between items-start mb-4">
-        <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
+        <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 shadow-inner group-hover:scale-110 transition-transform">
           {icon}
         </div>
       </div>
       <div>
         <h3 className="text-slate-400 text-sm font-medium mb-1">{title}</h3>
-        <div className="font-display text-3xl font-bold text-white tracking-tight mb-2 group-hover:scale-105 origin-left transition-transform">
+        <div className="font-display text-3xl font-bold text-white tracking-tight mb-2">
           {value}
         </div>
         <div className="text-xs text-slate-500 font-medium">{trend}</div>
       </div>
 
       {/* Background subtle glow */}
-      <div className={`absolute -bottom-6 -right-6 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none ${glow === "purple" ? "bg-purple-500" : "bg-cyan-500"}`} />
-    </div>
+      <div className={`absolute -bottom-6 -right-6 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-30 transition-opacity pointer-events-none ${glow === "purple" ? "bg-purple-500" : "bg-cyan-500"}`} />
+    </motion.div>
   );
 }
