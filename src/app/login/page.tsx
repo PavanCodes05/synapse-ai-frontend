@@ -14,6 +14,8 @@ export default function LoginPage() {
         setLoading(true);
         // Fake login delay
         setTimeout(() => {
+            // Set a fake auth token cookie to bypass middleware on frontend
+            document.cookie = "auth_token=dev_admin_token_xyz; path=/";
             router.push("/");
         }, 1500);
     };
